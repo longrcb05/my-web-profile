@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Nguyễn Nhật Long</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CÀI ĐẶT CHUNG --- */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary: #38bdf8;
+            --text-main: #f1f5f9;
+            --text-sec: #94a3b8;
+            --gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden; 
+            background: #0f172a; 
+        }
+
+        body.loaded { overflow-y: auto; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+
+        /* --- CANVAS EFFECT --- */
+        #canvas-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
+        }
+
+        .container {
+            max-width: 900px; margin: 0 auto; padding: 0 15px;
+            position: relative; z-index: 1;
+        }
+
+        /* --- NÚT ĐỔI NGÔN NGỮ --- */
+        .lang-switch { position: absolute; top: 15px; right: 15px; z-index: 100; }
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.1); color: var(--primary);
+            border: 1px solid var(--primary); padding: 5px 12px;
+            border-radius: 15px; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+            backdrop-filter: blur(5px); transition: 0.3s;
+        }
+        .lang-btn:hover { background: var(--primary); color: #0f172a; }
+
+        /* --- PRELOADER --- */
+        #preloader {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-color); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
+        .loaded #preloader { opacity: 0; visibility: hidden; }
+        .loader {
+            width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- ANIMATION --- */
+        header, .intro-section, .grid-info, footer { opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
+        .loaded header { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
+        .loaded .intro-section { opacity: 1; transform: translateY(0); transition-delay: 0.2s; }
+        .loaded .grid-info { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
+        .loaded footer { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
+
+        /* --- HEADER --- */
+        header { text-align: center; padding: 50px 0 30px; }
+        .avatar-container { position: relative; width: 140px; height: 140px; margin: 0 auto 20px; }
+        .avatar {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 3px solid rgba(255,255,255,0.1); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+            transition: transform 0.5s ease;
+        }
+        .avatar:hover { transform: scale(1.05); }
+        .status {
+            position: absolute; bottom: 8px; right: 8px; background: #22c55e;
+            width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--bg-color);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+
+        h1 { font-size: 2rem; margin-bottom: 5px; font-weight: 700; }
+        .highlight { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: var(--text-sec); font-size: 1rem; margin-bottom: 15px; }
+
+        .contact-text-row { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 0.9rem; color: var(--text-sec); }
+        .contact-item i { color: var(--primary); margin-right: 5px; }
+
+        .social-links { display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; }
+        .social-btn {
+            width: 38px; height: 38px; background: var(--card-bg); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+        }
+        .social-btn:hover { transform: translateY(-3px); color: white; background: var(--primary); }
+
+        /* --- SECTIONS (CẤU TRÚC LƯỚI & CHIỀU CAO BẰNG NHAU) --- */
+        section { margin-bottom: 30px; }
+        .section-title { font-size: 1.3rem; margin-bottom: 15px; border-left: 3px solid var(--primary); padding-left: 12px; }
+
+        /* Thiết lập lưới 2 cột */
+        .grid-info { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+        }
+
+        /* Mẹo quan trọng: Biến thẻ section thành Flex container để thẻ card bên trong giãn hết chiều cao */
+        .grid-info section {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0; /* Xóa margin thừa để căn đều */
+        }
+
+        .card {
+            background: var(--card-bg); padding: 25px 20px;
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px);
+            transition: transform 0.3s ease; 
+            flex: 1; /* Thẻ card sẽ tự động giãn chiều cao bằng với cột bên cạnh */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .card:hover { transform: translateY(-3px); border-color: rgba(56, 189, 248, 0.4); }
+        
+        /* --- SKILLS --- */
+        .skill-box { margin-bottom: 15px; }
+        .skill-info { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.95rem; font-weight: 500; }
+        .progress-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--gradient); border-radius: 10px; width: 0; transition: width 1s ease-out; }
+
+        /* --- PROJECTS (ĐÃ SỬA LỖI CĂN CHỈNH) --- */
+        .project-item { margin-bottom: 20px; }
+        
+        .project-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; /* Căn giữa theo chiều dọc */
+            margin-bottom: 10px; 
+            gap: 15px; /* Khoảng cách an toàn giữa tên dự án và nút */
+        }
+        
+        .project-header h3 { 
+            font-size: 1.1rem; 
+            color: var(--primary); 
+            margin: 0; 
+            line-height: 1.3;
+        }
+        
+        /* Nút Git đẹp hơn */
+        .project-link { 
+            font-size: 0.85rem; 
+            color: var(--primary); 
+            border: 1px solid var(--primary);
+            padding: 6px 14px; 
+            border-radius: 8px; 
+            white-space: nowrap; 
+            flex-shrink: 0; /* Không bị bóp méo */
+            text-decoration: none;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .project-link:hover { background: var(--primary); color: #000; }
+        
+        .project-desc { font-size: 0.95rem; margin-bottom: 8px; color: var(--text-main); }
+        .tech-stack { font-size: 0.8rem; color: var(--text-sec); font-style: italic; }
+
+        .cta-btn {
+            display: inline-block; background: var(--gradient); color: white; padding: 10px 25px;
+            border-radius: 50px; font-weight: 600; font-size: 0.95rem;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); transition: 0.3s;
+        }
+        .cta-btn:hover { opacity: 0.9; transform: scale(1.05); }
+
+        footer { text-align: center; padding: 40px 0; color: var(--text-sec); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 30px;}
+
+        @media (max-width: 600px) {
+            .container { padding: 0 15px; }
+            .grid-info { grid-template-columns: 1fr; }
+            .contact-text-row { flex-direction: column; gap: 8px; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <div id="preloader">
+        <div class="loader"></div>
+    </div>
+
+    <div class="container">
+        
+        <div class="lang-switch">
+            <button onclick="toggleLanguage()" class="lang-btn" id="langBtn">EN</button>
+        </div>
+
+        <header>
+            <div class="avatar-container">
+                <img src="avatar.jpg" alt="Avatar" class="avatar">
+                <div class="status" title="Online"></div>
+            </div>
+            <h1>
+                <span data-i18n="greeting">Xin chào, tôi là</span> 
+                <span class="highlight">Nguyễn Nhật Long</span>
+            </h1>
+            <p class="subtitle" data-i18n="role">Tôi đang là một Software Engineer và đang theo học tại Đại học Duy Tân</p>
+            
+            <div class="contact-text-row">
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i> <span>longrcb01@gmail.com</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i> <span>+84 886557205</span>
+                </div>
+            </div>
+
+            <div class="social-links">
+                <a href="https://www.facebook.com/longrcb05" target="_blank" class="social-btn fb"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/longrcb05" target="_blank" class="social-btn ig"><i class="fab fa-instagram"></i></a>
+                <a href="https://github.com/longrcb05" target="_blank" class="social-btn gh"><i class="fab fa-github"></i></a>
+                <a href="mailto:longrcb01@gmail.com" class="social-btn em"><i class="fas fa-envelope"></i></a>
+                <a href="tel:0886557205" class="social-btn ph"><i class="fas fa-phone"></i></a>
+            </div>
+
+            <a href="mailto:longrcb01@gmail.com" class="cta-btn" data-i18n="contactBtn">Liên Hệ Ngay</a>
+        </header>
+
+        <section class="intro-section">
+            <h2 class="section-title" data-i18n="aboutTitle">Giới Thiệu</h2>
+            <div class="card">
+                <p data-i18n="aboutText">Tôi có niềm đam mê liên quan đến các công nghệ và lập trình. Tôi luôn chủ động tìm hiểu, học hỏi và khám phá sâu hơn về cấu trúc cũng như cách vận hành của các hệ thống công nghệ.</p>
+            </div>
+        </section>
+
+        <div class="grid-info">
+            
+            <section>
+                <h2 class="section-title" data-i18n="skillsTitle">Kỹ Năng</h2>
+                <div class="card">
+                    <div class="skill-box">
+                        <div class="skill-info"><span><i class="fab fa-java"></i> Java</span><span class="skill-percent">80%</span></div>
+                        <div class="progress-bg"><div class="progress-bar" data-width="80%"></div></div>
+                    </div>
+                    <div class="skill-box">
+                        <div class="skill-info"><span><i class="fas fa-code"></i> C++</span><span class="skill-percent">70%</span></div>
+                        <div class="progress-bg"><div class="progress-bar" data-width="70%"></div></div>
+                    </div>
+                    <div class="skill-box">
+                        <div class="skill-info"><span><i class="fab fa-html5"></i> HTML/CSS</span><span class="skill-percent">65%</span></div>
+                        <div class="progress-bg"><div class="progress-bar" data-width="65%"></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title" data-i18n="projectsTitle">Dự Án Nổi Bật</h2>
+                <div class="card">
+                    
+                    <div class="project-item">
+                        <div class="project-header">
+                            <h3 data-i18n="proj1Name">🎓 Quản Lý Sinh Viên</h3>
+                            <a href="https://github.com/longrcb05/Quan_Ly_Sinh_Vien.git" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Git
+                            </a>
+                        </div>
+                        <p class="project-desc" data-i18n="proj1Desc">Hệ thống quản lý thông tin và điểm số.</p>
+                        <div class="tech-stack">Source: GitHub Repository</div>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
+
+                    <div class="project-item">
+                        <div class="project-header">
+                            <h3 data-i18n="proj2Name">📱 Module Crack iOS</h3>
+                            <a href="https://github.com/longrcb05/Module_IOS.git" target="_blank" class="project-link">
+                                <i class="fab fa-github"></i> Git
+                            </a>
+                        </div>
+                        <p class="project-desc" data-i18n="proj2Desc">Module hỗ trợ tùy biến ứng dụng iOS.</p>
+                        <div class="tech-stack">Platform: iOS</div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p>© 2025 Nguyễn Nhật Long. All rights reserved.</p>
+            <p style="margin-top: 5px; font-size: 0.8rem; color: #64748b;" data-i18n="footerText">Thank you for visiting. See you again :D</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- 1. HIỆU ỨNG TUYẾT RƠI (CANVAS) ---
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particlesArray = [];
+        const numberOfParticles = 100;
+
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 2 + 0.5;
+                this.opacity = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y > canvas.height) {
+                    this.y = 0 - this.size;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(255, 255, 255,' + this.opacity + ')';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < numberOfParticles; i++) { particlesArray.push(new Particle()); }
+        }
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        initParticles();
+        animateParticles();
+
+        // --- 2. LOADING & ANIMATION ---
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+                const bars = document.querySelectorAll('.progress-bar');
+                bars.forEach(bar => { bar.style.width = bar.getAttribute('data-width'); });
+            }, 500);
+        });
+
+        // --- 3. ĐA NGÔN NGỮ ---
+        const translations = {
+            vi: {
+                greeting: "Xin chào, tôi là",
+                role: "Software Engineer | Sinh viên Đại học Duy Tân",
+                contactBtn: "Liên Hệ Ngay",
+                aboutTitle: "Giới Thiệu",
+                aboutText: "Tôi đam mê công nghệ và lập trình. Luôn chủ động tìm hiểu sâu về cấu trúc và cách vận hành của các hệ thống.",
+                skillsTitle: "Kỹ Năng",
+                projectsTitle: "Dự Án Nổi Bật",
+                proj1Name: "🎓 Quản Lý Sinh Viên",
+                proj1Desc: "Hệ thống quản lý thông tin và điểm số.",
+                proj2Name: "📱 Module Crack iOS",
+                proj2Desc: "Module hỗ trợ tùy biến ứng dụng iOS.",
+                footerText: "Cảm ơn bạn đã ghé thăm. Hẹn gặp lại:D",
+                btnText: "EN"
+            },
+            en: {
+                greeting: "Hello, I am",
+                role: "Software Engineer | Student at Duy Tan University",
+                contactBtn: "Contact Me",
+                aboutTitle: "About Me",
+                aboutText: "Passionate about technology and programming. I always explore deep into system architecture and operations.",
+                skillsTitle: "Skills",
+                projectsTitle: "Featured Projects",
+                proj1Name: "🎓 Student Manager",
+                proj1Desc: "System for managing student info & scores.",
+                proj2Name: "📱 iOS Crack Module",
+                proj2Desc: "iOS app customization module.",
+                footerText: "Thank you for visiting. See you again:D",
+                btnText: "VN"
+            }
+        };
+
+        let currentLang = 'vi';
+        function toggleLanguage() {
+            currentLang = (currentLang === 'vi') ? 'en' : 'vi';
+            const content = translations[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (content[key]) el.innerText = content[key];
+            });
+            document.getElementById('langBtn').innerText = content.btnText;
+        }
+    </script>
+</body>
+</html>

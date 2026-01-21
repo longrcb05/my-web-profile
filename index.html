@@ -11,11 +11,13 @@
         /* --- CÀI ĐẶT CHUNG --- */
         :root {
             --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-bg: rgba(30, 41, 59, 0.9);
             --primary: #38bdf8;
             --text-main: #f1f5f9;
             --text-sec: #94a3b8;
             --gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            --chat-user-bg: #38bdf8;
+            --chat-bot-bg: #334155;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,7 +28,6 @@
             color: var(--text-main);
             line-height: 1.6;
             overflow-x: hidden; 
-            background: #0f172a; 
         }
 
         body.loaded { overflow-y: auto; }
@@ -68,23 +69,13 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* --- ANIMATION (HIỆU ỨNG XUẤT HIỆN) --- */
-        /* 1. Header hiện ngay khi load */
-        header { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .loaded header { opacity: 1; transform: translateY(0); }
-
-        /* 2. Các phần tử bên dưới (reveal) sẽ ẩn đi chờ lướt xuống */
-        .reveal {
-            opacity: 0;
-            transform: translateY(50px); /* Dịch xuống dưới 50px */
-            transition: all 0.8s ease-out;
+        /* --- SỬA LỖI MÀN HÌNH ĐEN --- */
+        header, section, .grid-info, footer, .reveal, .card { 
+            opacity: 1 !important; 
+            transform: none !important; 
+            visibility: visible !important;
         }
-        
-        /* Khi thêm class .active thì hiện lên */
-        .reveal.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .card:hover { transform: translateY(-5px) !important; border-color: rgba(56, 189, 248, 0.6); }
 
         /* --- HEADER --- */
         header { text-align: center; padding: 50px 0 30px; }
@@ -134,13 +125,14 @@
             transition: transform 0.3s ease; 
             flex: 1; display: flex; flex-direction: column; justify-content: flex-start;
         }
-        .card:hover { transform: translateY(-3px); border-color: rgba(56, 189, 248, 0.4); }
         
+        /* SKILLS */
         .skill-box { margin-bottom: 15px; }
         .skill-info { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.95rem; font-weight: 500; }
         .progress-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
         .progress-bar { height: 100%; background: var(--gradient); border-radius: 10px; width: 0; transition: width 1s ease-out; }
 
+        /* PROJECTS */
         .project-item { margin-bottom: 20px; }
         .project-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 15px; }
         .project-header h3 { font-size: 1.1rem; color: var(--primary); margin: 0; line-height: 1.3; }
@@ -155,6 +147,17 @@
         .project-desc { font-size: 0.95rem; margin-bottom: 8px; color: var(--text-main); }
         .tech-stack { font-size: 0.8rem; color: var(--text-sec); font-style: italic; }
 
+        /* CERTIFICATES */
+        .cert-item { margin-bottom: 15px; }
+        .cert-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .cert-header h3 { font-size: 1.05rem; color: var(--text-main); margin: 0; font-weight: 600; line-height: 1.3; }
+        .cert-year { 
+            font-size: 0.75rem; color: var(--primary); border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 2px 8px; border-radius: 10px; background: rgba(56, 189, 248, 0.1);
+            white-space: nowrap; margin-left: 10px;
+        }
+        .cert-issuer { font-size: 0.85rem; color: var(--text-sec); font-style: italic; }
+
         .cta-btn {
             display: inline-block; background: var(--gradient); color: white; padding: 10px 25px;
             border-radius: 50px; font-weight: 600; font-size: 0.95rem;
@@ -164,10 +167,91 @@
 
         footer { text-align: center; padding: 40px 0; color: var(--text-sec); font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 30px;}
 
+        /* --- CHATBOX WIDGET STYLES --- */
+        .chat-widget {
+            position: fixed; bottom: 30px; right: 30px; z-index: 1000;
+            display: flex; flex-direction: column; align-items: flex-end;
+        }
+
+        .chat-toggle-btn {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: var(--gradient); color: white; border: none;
+            font-size: 1.5rem; cursor: pointer;
+            box-shadow: 0 5px 20px rgba(56, 189, 248, 0.5);
+            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+            animation: bounce 2s infinite;
+        }
+        .chat-toggle-btn:hover { transform: scale(1.1); }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+
+        .chat-box {
+            width: 350px; height: 450px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform-origin: bottom right;
+            animation: popIn 0.3s ease-out;
+        }
+        @keyframes popIn { from {opacity: 0; transform: scale(0.5);} to {opacity: 1; transform: scale(1);} }
+
+        .chat-header {
+            padding: 15px; background: var(--gradient);
+            color: white; font-weight: 600;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-close { cursor: pointer; font-size: 1.2rem; opacity: 0.8; }
+        .chat-close:hover { opacity: 1; }
+
+        .chat-messages {
+            flex: 1; padding: 15px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .message {
+            max-width: 80%; padding: 10px 15px; border-radius: 15px;
+            font-size: 0.9rem; line-height: 1.4; word-wrap: break-word;
+        }
+        .bot-msg {
+            background: var(--chat-bot-bg); color: var(--text-main);
+            align-self: flex-start; border-bottom-left-radius: 2px;
+        }
+        .user-msg {
+            background: var(--chat-user-bg); color: #000;
+            align-self: flex-end; border-bottom-right-radius: 2px;
+            font-weight: 500;
+        }
+
+        .typing { font-size: 0.8rem; color: var(--text-sec); font-style: italic; margin-left: 5px; display: none; }
+
+        .chat-input-area {
+            padding: 10px; border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; gap: 10px; background: rgba(30, 41, 59, 0.5);
+        }
+        .chat-input {
+            flex: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+            color: white; padding: 10px; border-radius: 20px; outline: none;
+        }
+        .chat-send {
+            background: transparent; border: none; color: var(--primary);
+            font-size: 1.2rem; cursor: pointer; transition: 0.2s;
+        }
+        .chat-send:hover { transform: scale(1.2); color: white; }
+
         @media (max-width: 600px) {
             .container { padding: 0 15px; }
             .grid-info { grid-template-columns: 1fr; }
             .contact-text-row { flex-direction: column; gap: 8px; align-items: center; }
+            .chat-box { width: 90%; right: 5%; bottom: 80px; height: 60vh; }
         }
     </style>
 </head>
@@ -246,7 +330,6 @@
             <section class="reveal">
                 <h2 class="section-title" data-i18n="projectsTitle">Dự Án Nổi Bật</h2>
                 <div class="card">
-                    
                     <div class="project-item">
                         <div class="project-header">
                             <h3 data-i18n="proj1Name">🎓 Quản Lý Sinh Viên</h3>
@@ -257,9 +340,7 @@
                         <p class="project-desc" data-i18n="proj1Desc">Hệ thống quản lý thông tin và điểm số sinh viên.</p>
                         <div class="tech-stack" data-i18n="proj1Source">Source: GitHub Repository</div>
                     </div>
-
                     <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 15px 0;">
-
                     <div class="project-item">
                         <div class="project-header">
                             <h3 data-i18n="proj2Name">📱 Module Crack iOS</h3>
@@ -270,9 +351,30 @@
                         <p class="project-desc" data-i18n="proj2Desc">Module hỗ trợ tùy biến và can thiệp ứng dụng iOS.</p>
                         <div class="tech-stack" data-i18n="proj2Platform">Platform: iOS</div>
                     </div>
-
                 </div>
             </section>
+
+            <section class="reveal">
+                <h2 class="section-title" data-i18n="certsTitle">Chứng Chỉ</h2>
+                <div class="card">
+                    <div class="cert-item">
+                        <div class="cert-header">
+                            <h3 data-i18n="cert1Name">📜 Gemini Certified Student</h3>
+                            <span class="cert-year" data-i18n="cert1Date">2025</span>
+                        </div>
+                        <div class="cert-issuer" data-i18n="cert1Issuer">Cấp bởi: Google for Education</div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 12px 0;">
+                    <div class="cert-item">
+                        <div class="cert-header">
+                            <h3 data-i18n="cert2Name">📜 Understanding AI and LLMs as a Network Engineer (AI4NE)</h3>
+                            <span class="cert-year" data-i18n="cert2Date">2026</span>
+                        </div>
+                        <div class="cert-issuer" data-i18n="cert2Issuer">Cấp bởi: Cisco Networking Academy</div>
+                    </div>
+                </div>
+            </section>
+
         </div>
 
         <footer class="reveal">
@@ -281,8 +383,51 @@
         </footer>
     </div>
 
+    <div class="chat-widget">
+        <div class="chat-box" id="chatBox">
+            <div class="chat-header">
+                <span data-i18n="chatTitle">Chat với Long AI</span>
+                <i class="fas fa-times chat-close" onclick="toggleChat()"></i>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-msg" data-i18n="chatWelcome">Chào bạn! Tôi là trợ lý ảo của Long. Tôi có thể giúp gì cho bạn?</div>
+            </div>
+            <div class="typing" id="typingIndicator">Long AI đang nhập...</div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Nhập tin nhắn..." onkeypress="handleEnter(event)">
+                <button class="chat-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <button class="chat-toggle-btn" onclick="toggleChat()">
+            <i class="fas fa-comment-dots"></i>
+        </button>
+    </div>
+
     <script>
-        // --- 1. HIỆU ỨNG TUYẾT RƠI (CANVAS) ---
+        // --- CẤU HÌNH AI (HUGGING FACE) ---
+        // 🔴 Đã tự động điền Token mới của bạn
+        const HF_TOKEN = "hf_CbnEBMcoUhCzArYPBB1wyQoLqipLsggFiO"; 
+        
+        // Sử dụng model Qwen 2.5 (Siêu nhẹ, không bị chặn)
+        const API_URL = "https://api-inference.huggingface.co/models/Qwen/Qwen2.5-Coder-32B-Instruct";
+
+        const contextPrompt = `
+            You are an AI assistant for Nguyen Nhat Long.
+            Here is Long's profile:
+            - Name: Nguyen Nhat Long, student at Duy Tan University, Software Engineer.
+            - Skills: Java (80%), C++ (70%), HTML/CSS (65%).
+            - Projects: Student Management (Java), iOS Crack Module.
+            - Certificates: Gemini Certified Student (Google), AI & LLMs (Cisco).
+            - Contact: longrcb01@gmail.com, Phone: 0886557205.
+            
+            Instructions:
+            1. Answer politely and concisely.
+            2. If asked about Long, use the info above.
+            3. If asked about coding/general knowledge, answer as an expert.
+            4. Reply in the same language as the user (Vietnamese or English).
+        `;
+
+        // --- 1. CANVAS ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -320,9 +465,7 @@
             }
         }
 
-        function initParticles() {
-            for (let i = 0; i < numberOfParticles; i++) { particlesArray.push(new Particle()); }
-        }
+        function initParticles() { for (let i = 0; i < numberOfParticles; i++) { particlesArray.push(new Particle()); } }
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             for (let i = 0; i < particlesArray.length; i++) {
@@ -334,36 +477,95 @@
         initParticles();
         animateParticles();
 
-        // --- 2. LOADING & SCROLL REVEAL ---
+        // --- LOADING ---
         window.addEventListener('load', function() {
             setTimeout(function() {
                 document.body.classList.add('loaded');
                 const bars = document.querySelectorAll('.progress-bar');
                 bars.forEach(bar => { bar.style.width = bar.getAttribute('data-width'); });
                 
-                // Kiểm tra ngôn ngữ đã lưu
                 const savedLang = localStorage.getItem('selectedLang');
-                if (savedLang === 'en') {
-                    toggleLanguage(true);
-                }
+                if (savedLang === 'en') { toggleLanguage(true); }
             }, 500);
         });
 
-        // Xử lý hiệu ứng lướt xuống hiện lên (Intersection Observer)
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active'); // Thêm class để hiện ra
-                }
-            });
-        }, {
-            threshold: 0.15 // Khi thấy 15% phần tử thì bắt đầu hiện
-        });
+        // --- 2. CHATBOT LOGIC ---
+        function toggleChat() {
+            const chatBox = document.getElementById('chatBox');
+            if (chatBox.style.display === 'flex') {
+                chatBox.style.display = 'none';
+            } else {
+                chatBox.style.display = 'flex';
+                document.getElementById('chatInput').focus();
+            }
+        }
 
-        // Gắn observer cho tất cả các phần tử có class 'reveal'
-        document.querySelectorAll('.reveal').forEach(el => {
-            observer.observe(el);
-        });
+        function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (message === "") return;
+
+            appendMessage(message, 'user-msg');
+            input.value = '';
+
+            const typingIndicator = document.getElementById('typingIndicator');
+            typingIndicator.style.display = 'block';
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+
+            try {
+                const responseText = await callHuggingFaceAI(message);
+                appendMessage(responseText, 'bot-msg');
+            } catch (error) {
+                console.error(error);
+                appendMessage(`⚠️ Lỗi: ${error.message}. Thử lại sau 30s nhé!`, 'bot-msg');
+            } finally {
+                typingIndicator.style.display = 'none';
+            }
+        }
+
+        async function callHuggingFaceAI(userMessage) {
+            // Cấu trúc prompt cho Qwen
+            const prompt = `<|im_start|>system\n${contextPrompt}<|im_end|>\n<|im_start|>user\n${userMessage}<|im_end|>\n<|im_start|>assistant\n`;
+
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${HF_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    inputs: prompt,
+                    parameters: {
+                        return_full_text: false, 
+                        max_new_tokens: 500,
+                        temperature: 0.7
+                    }
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                if (data.error.includes("loading")) {
+                    return "AI đang khởi động (mất khoảng 20s). Bạn đợi chút rồi thử lại nhé!";
+                }
+                throw new Error(data.error);
+            }
+
+            // Lấy kết quả từ Qwen
+            return data[0].generated_text;
+        }
+
+        function appendMessage(text, className) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${className}`;
+            let formattedText = text.replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<b>$1</b>"); 
+            msgDiv.innerHTML = formattedText;
+            document.getElementById('chatMessages').appendChild(msgDiv);
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
 
         // --- 3. ĐA NGÔN NGỮ ---
         const translations = {
@@ -381,8 +583,17 @@
                 proj2Name: "📱 Module Crack iOS",
                 proj2Desc: "Module hỗ trợ tùy biến và can thiệp ứng dụng iOS.",
                 proj2Platform: "Platform: iOS",
+                certsTitle: "Chứng Chỉ",
+                cert1Name: "📜 Gemini Certified Student",
+                cert1Date: "2025",
+                cert1Issuer: "Cấp bởi: Google for Education",
+                cert2Name: "📜 Hiểu về Trí tuệ Nhân tạo và Mô hình LLM dành cho Kỹ sư Mạng (AI4NE)",
+                cert2Date: "2026",
+                cert2Issuer: "Cấp bởi: Cisco Networking Academy",
                 footerText: "Cảm ơn bạn đã ghé thăm. Hẹn gặp lại nhé :D",
-                btnText: "EN"
+                btnText: "EN",
+                chatTitle: "Chat với AI",
+                chatWelcome: "Chào bạn! Tôi là trợ lý ảo của Long. Tôi có thể giúp gì cho bạn?"
             },
             en: {
                 greeting: "Hello, I am",
@@ -398,19 +609,25 @@
                 proj2Name: "📱 iOS Crack Module",
                 proj2Desc: "Module supporting iOS app customization and intervention.",
                 proj2Platform: "Platform: iOS",
+                certsTitle: "Certificates",
+                cert1Name: "📜 Gemini Certified Student",
+                cert1Date: "2025",
+                cert1Issuer: "Issued by: Google for Education",
+                cert2Name: "📜 Understanding AI and LLMs as a Network Engineer (AI4NE)",
+                cert2Date: "2026",
+                cert2Issuer: "Issued by: Cisco Networking Academy",
                 footerText: "Thank you for visiting. See you again :D",
-                btnText: "VN"
+                btnText: "VN",
+                chatTitle: "Chat with AI",
+                chatWelcome: "Hi there! I'm Long's virtual assistant. How can I help you?"
             }
         };
 
         let currentLang = 'vi';
 
         function toggleLanguage(forceEnglish = false) {
-            if (forceEnglish) {
-                currentLang = 'en';
-            } else {
-                currentLang = (currentLang === 'vi') ? 'en' : 'vi';
-            }
+            if (forceEnglish) { currentLang = 'en'; } 
+            else { currentLang = (currentLang === 'vi') ? 'en' : 'vi'; }
 
             localStorage.setItem('selectedLang', currentLang);
             const content = translations[currentLang];
@@ -421,6 +638,7 @@
             });
 
             document.getElementById('langBtn').innerText = content.btnText;
+            document.getElementById('chatInput').placeholder = currentLang === 'vi' ? "Nhập tin nhắn..." : "Type a message...";
         }
     </script>
 </body>
